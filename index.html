@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1c1a35" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <title>Colorful Snake</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header" role="banner">
+    <h1>Snake</h1>
+    <div class="header-stats">
+      <div><span class="label">Score</span><span id="current-score">0</span></div>
+      <div><span class="label">Best</span><span id="high-score">0</span></div>
+      <div><span class="label">Speed</span><span id="current-speed">Normal</span></div>
+    </div>
+  </header>
+
+  <main class="app-main" role="main">
+    <div class="canvas-wrapper" aria-label="Game area">
+      <canvas id="game-canvas" width="640" height="480" role="img" aria-label="Snake game board"></canvas>
+      <div class="hint" id="start-hint">Press any arrow key to start</div>
+    </div>
+
+    <aside class="sidebar" aria-label="Settings">
+      <label for="speed-select">Speed</label>
+      <select id="speed-select" aria-label="Select speed">
+        <option value="slow">Slow</option>
+        <option value="normal" selected>Normal</option>
+        <option value="fast">Fast</option>
+      </select>
+      <button id="pause-btn">Pause</button>
+      <button id="restart-btn">Restart</button>
+    </aside>
+  </main>
+
+  <script src="pwa.js" defer></script>
+  <script src="game.js" defer></script>
+</body>
+</html>
