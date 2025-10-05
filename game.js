@@ -28,6 +28,7 @@ let cellHeight = 16;
 let snake = [];
 let direction = { x: 1, y: 0 };
 let nextDirection = { x: 1, y: 0 };
+let directionQueue = [];
 let food = { x: 0, y: 0 };
 let running = false;
 let paused = false;
@@ -176,9 +177,23 @@ function queueDirection(dir) {
   const newDir = directions[dir];
   if (!newDir) return;
 
-  if (newDir.x === -direction.x && newDir.y === -direction.y) return;
+  const lastQueuedDirection =
+    directionQueue.length > 0
+      ? directionQueue[directionQueue.length - 1]
+      : nextDirection;
 
-  nextDirection = newDir;
+  if (
+    (newDir.x === lastQueuedDirection.x && newDir.y === lastQueuedDirection.y) ||
+    (newDir.x === -lastQueuedDirection.x && newDir.y === -lastQueuedDirection.y)
+  ) {
+    return;
+  }
+
+  directionQueue.push(newDir);
+
+  if (directionQueue.length === 1) {
+    nextDirection = newDir;
+  }
 }
 
 function resetGameState() {
@@ -190,6 +205,7 @@ function resetGameState() {
   ];
   direction = { x: 1, y: 0 };
   nextDirection = { x: 1, y: 0 };
+  directionQueue = [];
   score = 0;
   gameOver = false;
   paused = false;
@@ -285,6 +301,10 @@ function gameLoop(timestamp) {
 }
 
 function update() {
+  if (directionQueue.length > 0) {
+    nextDirection = directionQueue.shift();
+  }
+
   direction = nextDirection;
 
   const newHead = {
@@ -292,14 +312,16 @@ function update() {
     y: snake[0].y + direction.y,
   };
 
-  if (isCollision(newHead)) {
+  const willGrow = newHead.x === food.x && newHead.y === food.y;
+
+  if (isCollision(newHead, !willGrow)) {
     handleGameOver();
     return;
   }
 
   snake.unshift(newHead);
 
-  if (newHead.x === food.x && newHead.y === food.y) {
+  if (willGrow) {
     score += 10;
     if (score > highScore) {
       highScore = score;
@@ -309,15 +331,26 @@ function update() {
     snake.pop();
   }
 
+  if (directionQueue.length > 0) {
+    nextDirection = directionQueue[0];
+  } else {
+    nextDirection = direction;
+  }
+
   updateScoreboard();
 }
 
-function isCollision(position) {
+function isCollision(position, ignoreTail = false) {
   if (position.x < 0 || position.x >= GRID_SIZE || position.y < 0 || position.y >= GRID_SIZE) {
     return true;
   }
 
-  return snake.some((segment) => segment.x === position.x && segment.y === position.y);
+  return snake.some((segment, index) => {
+    if (ignoreTail && index === snake.length - 1) {
+      return false;
+    }
+    return segment.x === position.x && segment.y === position.y;
+  });
 }
 
 function handleGameOver() {
